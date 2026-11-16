@@ -1,0 +1,183 @@
+{
+  "info": {
+    "name": "Instant Link",
+    "description": "Sandbox calls for Plaid Check Instant Link. Create a user, then POST /cra/report/get with scope PLAID_NETWORK and no report_id. There is no Link session. This file is the v2.1 collection the Postman web app can import. The YAML under postman/ is for the desktop Git connection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "client_user_id", "value": "" },
+    { "key": "user_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Create user",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"client_id\": \"{{client_id}}\",\n  \"secret\": \"{{secret}}\",\n  \"client_user_id\": \"{{client_user_id}}\",\n  \"identity\": {\n    \"name\": {\n      \"given_name\": \"Jane\",\n      \"family_name\": \"Doe\"\n    },\n    \"date_of_birth\": \"1990-04-15\",\n    \"emails\": [\n      { \"data\": \"jane.doe@example.com\", \"primary\": true }\n    ],\n    \"phone_numbers\": [\n      { \"data\": \"{{sandbox_phone}}\", \"primary\": true }\n    ],\n    \"addresses\": [\n      {\n        \"street_1\": \"123 Main St\",\n        \"street_2\": \"Apt 4B\",\n        \"city\": \"San Francisco\",\n        \"region\": \"CA\",\n        \"postal_code\": \"94105\",\n        \"country\": \"US\",\n        \"primary\": true\n      }\n    ],\n    \"id_numbers\": [\n      { \"value\": \"1234\", \"type\": \"us_ssn_last_4\" }\n    ]\n  }\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/user/create",
+        "description": "Creates the Plaid user Instant Link will match. The pre-request script assigns a new client_user_id on every send. The test script stores user_id for the get."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const clientUserId = \"applicant-\" + Date.now().toString(36);",
+              "pm.collectionVariables.set(\"client_user_id\", clientUserId);",
+              "if (pm.environment.name) {",
+              "  pm.environment.set(\"client_user_id\", clientUserId);",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "",
+              "pm.test(\"Sandbox credentials are set\", function () {",
+              "  pm.expect(pm.environment.get(\"client_id\"), \"client_id\").to.be.a(\"string\").and.not.empty;",
+              "  pm.expect(pm.environment.get(\"secret\"), \"secret\").to.be.a(\"string\").and.not.empty;",
+              "});",
+              "",
+              "pm.test(\"Create user returns 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response includes a user_id\", function () {",
+              "  pm.expect(body.user_id, \"user_id\").to.be.a(\"string\").and.to.match(/^usr_/);",
+              "});",
+              "",
+              "if (body.user_id) {",
+              "  pm.collectionVariables.set(\"user_id\", body.user_id);",
+              "  if (pm.environment.name) {",
+              "    pm.environment.set(\"user_id\", body.user_id);",
+              "  }",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update user identity",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"client_id\": \"{{client_id}}\",\n  \"secret\": \"{{secret}}\",\n  \"user_id\": \"{{user_id}}\",\n  \"identity\": {\n    \"phone_numbers\": [\n      { \"data\": \"{{sandbox_phone}}\", \"primary\": true }\n    ]\n  }\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/user/update",
+        "description": "Optional. Patches identity before you retry the Instant Link get. The saved body sets the sandbox phone used for a successful network match."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const userId = pm.collectionVariables.get(\"user_id\") || pm.environment.get(\"user_id\");",
+              "if (!userId) {",
+              "  throw new Error(\"Run Create user first so user_id is set.\");",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Update user returns 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response includes a request_id\", function () {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.request_id, \"request_id\").to.be.a(\"string\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Instant Link report",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"client_id\": \"{{client_id}}\",\n  \"secret\": \"{{secret}}\",\n  \"user_id\": \"{{user_id}}\",\n  \"scope\": \"PLAID_NETWORK\",\n  \"decision_stage\": \"{{decision_stage}}\",\n  \"consumer_report_permissible_purpose\": \"{{permissible_purpose}}\",\n  \"products\": [\n    {\n      \"product\": \"cra_lend_score\",\n      \"version\": \"V2\",\n      \"options\": {\n        \"variants\": [\"GENERALIST\", \"SHORT_TERM_LOANS\"]\n      }\n    },\n    { \"product\": \"cra_cashflow_insights\", \"version\": \"V2\" },\n    { \"product\": \"cra_network_insights\", \"version\": \"V2\" },\n    { \"product\": \"cra_income_insights\", \"version\": \"V2\" }\n  ]\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/cra/report/get",
+        "description": "Instant Link get. scope is PLAID_NETWORK, report_id is omitted, and Base Report is not requested."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const userId = pm.collectionVariables.get(\"user_id\") || pm.environment.get(\"user_id\");",
+              "if (!userId) {",
+              "  throw new Error(\"Run Create user first so user_id is set.\");",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "const products = (body.report && body.report.products) || [];",
+              "const productNames = products.map(function (row) { return row.product; });",
+              "",
+              "pm.test(\"Instant Link matched this user\", function () {",
+              "  const code = body.error_code || null;",
+              "  pm.expect(code, body.error_message || \"Instant Link error\").to.eql(null);",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Report scope is PLAID_NETWORK\", function () {",
+              "  pm.expect(body.report.scope).to.eql(\"PLAID_NETWORK\");",
+              "});",
+              "",
+              "pm.test(\"Response omits Base Report\", function () {",
+              "  pm.expect(productNames).to.not.include(\"cra_base_report\");",
+              "});",
+              "",
+              "pm.test(\"Response includes the Instant Link products\", function () {",
+              "  pm.expect(productNames).to.include.members([",
+              "    \"cra_lend_score\",",
+              "    \"cra_cashflow_insights\",",
+              "    \"cra_network_insights\",",
+              "    \"cra_income_insights\"",
+              "  ]);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

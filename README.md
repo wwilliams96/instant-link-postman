@@ -4,9 +4,22 @@ Sandbox collection for Plaid Check Instant Link. The requests live in Postman Co
 
 Instant Link does not open Link. Create a user, then call `POST /cra/report/get` with `scope: PLAID_NETWORK` and no `report_id`.
 
-## Connect GitHub to Postman
+## Use it in the Postman web app
 
-The remote is a private repo on github.com: `wwilliams96/instant-link-postman`. Postman reads the collection from this checkout.
+The web app cannot attach to a GitHub repo. Postman documents the Git-connected experience as desktop-only. The web app can import a collection file.
+
+1. On GitHub, open https://github.com/wwilliams96/instant-link-postman and download these two files (or use the copies in this folder):
+   - `instant-link.postman_collection.json`
+   - `instant-link-sandbox.postman_environment.json`
+2. In [Postman on the web](https://go.postman.co), click **Import**.
+3. Upload both files.
+4. Open the **Instant Link** collection, select the **Instant Link - Sandbox** environment, and set `client_id` and `secret`.
+
+That import is a copy. Later edits in the web app do not write back to GitHub.
+
+## Connect the repo in Postman desktop
+
+The remote is a private repo on github.com: `wwilliams96/instant-link-postman`. The desktop app reads the YAML under `postman/` from this checkout.
 
 1. Install [Postman desktop](https://www.postman.com/downloads/) (v12). Git needs to be on your PATH; Postman uses that Git, not its own.
 2. In Postman, open **Settings → Connected accounts** (or the GitHub prompt the first time you connect a repo) and authorize **github.com** for the `wwilliams96` account.
