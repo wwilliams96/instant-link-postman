@@ -1,0 +1,26 @@
+name: Instant Link - Sandbox
+values:
+  - key: baseUrl
+    value: https://sandbox.plaid.com
+    enabled: true
+  - key: client_id
+    value: ""
+    enabled: true
+  - key: secret
+    value: ""
+    enabled: true
+  - key: sandbox_phone
+    value: "+14155550011"
+    enabled: true
+  - key: decision_stage
+    value: DECISIONING
+    enabled: true
+  - key: permissible_purpose
+    value: EXTENSION_OF_CREDIT
+    enabled: true
+  - key: client_user_id
+    value: ""
+    enabled: true
+  - key: user_id
+    value: ""
+    enabled: true

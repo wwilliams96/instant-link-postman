@@ -1,0 +1,81 @@
+$kind: http-request
+description: |-
+  Instant Link get. scope is PLAID_NETWORK, report_id is omitted, and Base
+  Report is not requested. A match returns synchronously. NO_MATCHING_USER
+  means this identity did not match the network.
+method: POST
+url: "{{baseUrl}}/cra/report/get"
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "client_id": "{{client_id}}",
+      "secret": "{{secret}}",
+      "user_id": "{{user_id}}",
+      "scope": "PLAID_NETWORK",
+      "decision_stage": "{{decision_stage}}",
+      "consumer_report_permissible_purpose": "{{permissible_purpose}}",
+      "products": [
+        {
+          "product": "cra_lend_score",
+          "version": "V2",
+          "options": {
+            "variants": ["GENERALIST", "SHORT_TERM_LOANS"]
+          }
+        },
+        {
+          "product": "cra_cashflow_insights",
+          "version": "V2"
+        },
+        {
+          "product": "cra_network_insights",
+          "version": "V2"
+        },
+        {
+          "product": "cra_income_insights",
+          "version": "V2"
+        }
+      ]
+    }
+examples: ./.resources/Get Instant Link report.resources/examples
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      const userId = pm.collectionVariables.get("user_id") || pm.environment.get("user_id");
+      if (!userId) {
+        throw new Error("Run Create user first so user_id is set.");
+      }
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const body = pm.response.json();
+      const products = (body.report && body.report.products) || [];
+      const productNames = products.map(function (row) { return row.product; });
+
+      pm.test("Instant Link matched this user", function () {
+        const code = body.error_code || null;
+        pm.expect(code, body.error_message || "Instant Link error").to.eql(null);
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Report scope is PLAID_NETWORK", function () {
+        pm.expect(body.report.scope).to.eql("PLAID_NETWORK");
+      });
+
+      pm.test("Response omits Base Report", function () {
+        pm.expect(productNames).to.not.include("cra_base_report");
+      });
+
+      pm.test("Response includes the Instant Link products", function () {
+        pm.expect(productNames).to.include.members([
+          "cra_lend_score",
+          "cra_cashflow_insights",
+          "cra_network_insights",
+          "cra_income_insights"
+        ]);
+      });

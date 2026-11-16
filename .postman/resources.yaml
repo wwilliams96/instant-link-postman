@@ -1,0 +1,9 @@
+# Postman Native Git workspace configuration.
+#
+# Everything under postman/ is picked up in Local View, so the collection
+# and environment do not need entries here.
+#
+# workspace.id is only required for `postman workspace push` to Postman Cloud.
+# Replace the placeholder after you connect this folder to a workspace.
+workspace:
+  id: 00000000-0000-0000-0000-000000000000

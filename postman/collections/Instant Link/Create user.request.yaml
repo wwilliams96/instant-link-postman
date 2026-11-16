@@ -1,0 +1,89 @@
+$kind: http-request
+description: |-
+  Creates the Plaid user Instant Link will match. Identity is required even
+  though there is no bank-connect step. The pre-request script assigns a new
+  client_user_id on every send. The test script stores user_id for the get.
+method: POST
+url: "{{baseUrl}}/user/create"
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "client_id": "{{client_id}}",
+      "secret": "{{secret}}",
+      "client_user_id": "{{client_user_id}}",
+      "identity": {
+        "name": {
+          "given_name": "Jane",
+          "family_name": "Doe"
+        },
+        "date_of_birth": "1990-04-15",
+        "emails": [
+          {
+            "data": "jane.doe@example.com",
+            "primary": true
+          }
+        ],
+        "phone_numbers": [
+          {
+            "data": "{{sandbox_phone}}",
+            "primary": true
+          }
+        ],
+        "addresses": [
+          {
+            "street_1": "123 Main St",
+            "street_2": "Apt 4B",
+            "city": "San Francisco",
+            "region": "CA",
+            "postal_code": "94105",
+            "country": "US",
+            "primary": true
+          }
+        ],
+        "id_numbers": [
+          {
+            "value": "1234",
+            "type": "us_ssn_last_4"
+          }
+        ]
+      }
+    }
+examples: ./.resources/Create user.resources/examples
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      const clientUserId = "applicant-" + Date.now().toString(36);
+      pm.collectionVariables.set("client_user_id", clientUserId);
+      if (pm.environment.name) {
+        pm.environment.set("client_user_id", clientUserId);
+      }
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const body = pm.response.json();
+
+      pm.test("Sandbox credentials are set", function () {
+        pm.expect(pm.environment.get("client_id"), "client_id").to.be.a("string").and.not.empty;
+        pm.expect(pm.environment.get("secret"), "secret").to.be.a("string").and.not.empty;
+      });
+
+      pm.test("Create user returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Response includes a user_id", function () {
+        pm.expect(body.user_id, "user_id").to.be.a("string").and.to.match(/^usr_/);
+      });
+
+      if (body.user_id) {
+        pm.collectionVariables.set("user_id", body.user_id);
+        if (pm.environment.name) {
+          pm.environment.set("user_id", body.user_id);
+        }
+      }

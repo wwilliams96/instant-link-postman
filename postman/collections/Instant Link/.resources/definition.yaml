@@ -1,0 +1,18 @@
+$kind: collection
+name: Instant Link
+description: |-
+  Sandbox calls for Plaid Check Instant Link.
+
+  Instant Link matches the applicant identity from /user/create to the Plaid
+  Network. There is no Link session and no webhook on a match. Call
+  /cra/report/get with scope PLAID_NETWORK and omit report_id.
+
+  Run Create user, then Get Instant Link report. Update user identity is
+  optional: it patches the same sandbox phone and can be used when you are
+  retrying match quality. This collection does not call Standard Link.
+
+  Sandbox phone +14155550011 is the usual successful network match. Do not
+  request cra_base_report here; raw bank data is a Standard Link response.
+variables:
+  client_user_id: ""
+  user_id: ""

@@ -1,0 +1,5 @@
+.DS_Store
+
+# Copy the sandbox environment here if you need a filled-in local copy.
+# The committed environment keeps client_id and secret empty.
+postman/environments/*.local.environment.yaml

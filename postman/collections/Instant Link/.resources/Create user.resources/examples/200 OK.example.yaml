@@ -1,0 +1,19 @@
+$kind: http-example
+name: User created
+order: 1000
+request:
+  method: POST
+  url: https://sandbox.plaid.com/user/create
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Type
+      value: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "user_id": "usr_9nSp2KuZ2x4JDw",
+        "request_id": "Aim3b"
+      }

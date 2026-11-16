@@ -1,0 +1,47 @@
+$kind: http-request
+description: |-
+  Optional. Patches identity and then you retry the Instant Link get. The
+  body below sets the sandbox phone used for a successful network match, so
+  running the whole collection still hits that persona. Replace the phone
+  when you are testing a different match.
+method: POST
+url: "{{baseUrl}}/user/update"
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "client_id": "{{client_id}}",
+      "secret": "{{secret}}",
+      "user_id": "{{user_id}}",
+      "identity": {
+        "phone_numbers": [
+          {
+            "data": "{{sandbox_phone}}",
+            "primary": true
+          }
+        ]
+      }
+    }
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      const userId = pm.collectionVariables.get("user_id") || pm.environment.get("user_id");
+      if (!userId) {
+        throw new Error("Run Create user first so user_id is set.");
+      }
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Update user returns 200", function () {
+        pm.response.to.have.status(200);
+      });
+
+      pm.test("Response includes a request_id", function () {
+        const body = pm.response.json();
+        pm.expect(body.request_id, "request_id").to.be.a("string").and.not.empty;
+      });
