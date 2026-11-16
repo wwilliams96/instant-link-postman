@@ -29,7 +29,7 @@ body:
         },
         {
           "product": "cra_cashflow_insights",
-          "version": "V2"
+          "version": "V1"
         },
         {
           "product": "cra_network_insights",

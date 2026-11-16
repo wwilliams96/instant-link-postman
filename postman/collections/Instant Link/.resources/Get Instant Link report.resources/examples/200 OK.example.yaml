@@ -26,7 +26,7 @@ response:
           "consumer_report_permissible_purpose": "EXTENSION_OF_CREDIT",
           "products": [
             { "product": "cra_lend_score", "version": "V2" },
-            { "product": "cra_cashflow_insights", "version": "V2" },
+            { "product": "cra_cashflow_insights", "version": "V1" },
             { "product": "cra_network_insights", "version": "V2" },
             { "product": "cra_income_insights", "version": "V2" }
           ]
