@@ -124,7 +124,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"client_id\": \"{{client_id}}\",\n  \"secret\": \"{{secret}}\",\n  \"user_id\": \"{{user_id}}\",\n  \"scope\": \"PLAID_NETWORK\",\n  \"decision_stage\": \"{{decision_stage}}\",\n  \"consumer_report_permissible_purpose\": \"{{permissible_purpose}}\",\n  \"products\": [\n    {\n      \"product\": \"cra_lend_score\",\n      \"version\": \"V2\",\n      \"options\": {\n        \"variants\": [\"GENERALIST\", \"SHORT_TERM_LOANS\"]\n      }\n    },\n    { \"product\": \"cra_cashflow_insights\", \"version\": \"V1\" },\n    { \"product\": \"cra_network_insights\", \"version\": \"V2\" },\n    { \"product\": \"cra_income_insights\", \"version\": \"V2\" }\n  ]\n}",
+          "raw": "{\n  \"client_id\": \"{{client_id}}\",\n  \"secret\": \"{{secret}}\",\n  \"user_id\": \"{{user_id}}\",\n  \"scope\": \"PLAID_NETWORK\",\n  \"decision_stage\": \"{{decision_stage}}\",\n  \"consumer_report_permissible_purpose\": \"{{permissible_purpose}}\",\n  \"products\": [\n    {\n      \"product\": \"cra_lend_score\",\n      \"version\": \"V2\",\n      \"options\": {\n        \"variants\": [\"GENERALIST\", \"SHORT_TERM_LOANS\"]\n      }\n    },\n    { \"product\": \"cra_cashflow_insights\", \"version\": \"V1\" },\n    { \"product\": \"cra_network_insights\", \"version\": \"V1\" },\n    { \"product\": \"cra_income_insights\", \"version\": \"V2\" }\n  ]\n}",
           "options": { "raw": { "language": "json" } }
         },
         "url": "{{baseUrl}}/cra/report/get",

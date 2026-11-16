@@ -33,7 +33,7 @@ body:
         },
         {
           "product": "cra_network_insights",
-          "version": "V2"
+          "version": "V1"
         },
         {
           "product": "cra_income_insights",
